@@ -1,0 +1,15 @@
+name: First WorkFlow
+
+on: 
+  push: 
+      branches: 
+         -main
+
+
+jobs:
+   example-jop:
+        runs-on: ubuntu-latest
+
+        steps:
+          - name: print a welcome meassge
+            run: echo"Welcome To Our First Workflow"
