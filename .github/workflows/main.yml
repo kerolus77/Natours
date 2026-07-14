@@ -3,7 +3,7 @@ name: First WorkFlow
 on: 
   push: 
       branches: 
-         -main
+         - main
 
 
 jobs:
