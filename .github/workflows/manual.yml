@@ -1,0 +1,19 @@
+on: 
+  workflow_dispatch:
+    inputs:
+      env:
+        description: "choose the enviroment"
+        required: true
+        default: "staging"
+        type: choice
+        options:
+          - "staging"
+          - "production"
+
+jobs:
+  deploy:
+     runs-on: ubuntu-latest
+     steps:
+       - name: "deploy to a server"
+         run: echo "Deploying the application to ${{inputs.env}}"
+        
