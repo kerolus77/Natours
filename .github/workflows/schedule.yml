@@ -1,0 +1,9 @@
+on: 
+   schedule:
+      - cron: 0 19 15 * *
+jobs:
+   monthly-task:
+        runs-on: ubuntu-latest
+        steps:
+           - name: Print Message
+             run: echo "Running from schedule task"
