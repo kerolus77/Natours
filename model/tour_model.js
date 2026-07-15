@@ -1,4 +1,5 @@
  const mongoose=require('mongoose');
+ const slugify=require('slugify');
  
  const tourSchema=mongoose.Schema( {
     name: {
@@ -75,7 +76,49 @@
       type: Boolean,
       default: false
     }
-  },)
+
+  },{
+    toJSON:{virtuals:true},
+    toObject:{virtuals:true}
+  });
+
+  tourSchema.virtual('durationWeeks').get(function(){
+    return this.duration/7;
+  })
+// DOCUMENT MIDDLEWARE: runs before .save() and .create() not on .insertMany()
+  tourSchema.pre('save',function(next){
+    this.slug=slugify(this.name,{lower:true});
+    next();
+  })
+
+  // tourSchema.pre('save',function(next){
+  //   console.log('Will save document...');
+  //   next();
+  // })
+
+  // tourSchema.post('save',function(doc,next){
+  //   console.log(doc);
+  //   next();
+  // })
+
+// query middleware
+  tourSchema.pre(/^find/,function(next){
+    this.find({secretTour:{$ne:true}});
+    this.start=Date.now();
+    next();
+  })
+
+  tourSchema.post(/^find/,function(docs,next){
+    console.log(`Query took ${Date.now()-this.start} milliseconds`);
+    next();
+  })
+
+  // aggregation middleware
+  tourSchema.pre('aggregate',function(next){
+    this.pipeLine().unshift({$match:{secretTour:{$ne:true}}});
+    console.log(this.pipeLine());
+    next();
+  })
  const Tour=mongoose.model('Tour',tourSchema);
 
  module.exports=Tour;
