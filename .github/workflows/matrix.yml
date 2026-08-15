@@ -1,0 +1,14 @@
+on:
+    workflow_dispatch:
+
+jobs:
+    job_1:
+        strategy:
+            matrix:
+                os: [ubuntu-latest, windows-latest, macos-latest]
+                node_version: [20.6.0, 18.20.1, 16.20.1]
+        runs-on: ${{ matrix.os }}
+        steps:
+        - uses: actions/setup-node@v7
+          with:
+            node-version: ${{ matrix.node_version }}

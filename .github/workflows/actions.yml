@@ -1,0 +1,33 @@
+on:
+    workflow_dispatch:
+
+jobs:
+    hybrid_job:
+        runs-on: ubuntu-latest
+        steps:
+          - name: run a command in ubuntu VM
+            run: echo "Hello from ubuntu VM"
+          - name: run a command in docker container
+            uses: docker://alpine:3.18 # this will run the command in a docker container not need authentication
+            with:
+              entrypoint: /bin/sh      # specify the entrypoint for the docker container
+              args: |
+                -c
+                echo "Hello from docker container"
+
+          - name: run another command in ubuntu VM
+            run: echo "Hello again from ubuntu VM"
+
+    dockerized_job:
+        runs-on: ubuntu-latest
+        container:
+            image: node:20.6.0
+    #  container:
+    #    image: ghcr.io/username/repo:tag
+    #      credentials:  # if the image is private, you can use the github token to authenticate
+    #        username: ${{ secrets.DOCKER_USERNAME }}
+    #       password: ${{ secrets.DOCKER_PASSWORD }}
+
+        steps:
+            - run: node --version
+            - run: echo "Hello from dockerized job" 

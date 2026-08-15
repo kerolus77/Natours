@@ -75,49 +75,84 @@
     secretTour: {
       type: Boolean,
       default: false
-    }
+    },
+    startLocation:{
+      type:{
+        type:String,
+        default:'Point',
+        enum:['Point']
+      },
+      coordinates:[Number],
+      address:String,
+      description:String
 
+    },
+    locations:[
+{ type:{
+        type:String,
+        default:'Point',
+        enum:['Point']
+      },
+      coordinates:[Number],
+      address:String,
+      description:String,
+      day:Number
+    }
+    ],
+    guides:[
+      {
+        type:mongoose.Schema.ObjectId,
+        ref:'User'
+      }
+    ]
   },{
     toJSON:{virtuals:true},
     toObject:{virtuals:true}
   });
+//
 
+
+// Virtual properties are not stored in the database, they are just computed values that can be derived from existing data. In this case, durationWeeks is a virtual property that calculates the number of weeks based on the duration of the tour in days. It divides the duration by 7 to get the equivalent number of weeks.
   tourSchema.virtual('durationWeeks').get(function(){
     return this.duration/7;
   })
-// DOCUMENT MIDDLEWARE: runs before .save() and .create() not on .insertMany()
-  tourSchema.pre('save',function(next){
-    this.slug=slugify(this.name,{lower:true});
-    next();
+
+  //Virtual populate
+  tourSchema.virtual('reviews',{
+    ref:'Review',
+    foreignField:'tour',
+    localField:'_id'
   })
 
-  // tourSchema.pre('save',function(next){
-  //   console.log('Will save document...');
-  //   next();
-  // })
-
-  // tourSchema.post('save',function(doc,next){
-  //   console.log(doc);
-  //   next();
-  // })
+  
+// DOCUMENT MIDDLEWARE: runs before .save() and .create() not on .insertMany()
+  tourSchema.pre('save',function(){
+    this.slug=slugify(this.name,{lower:true});
+    // next();
+  })
 
 // query middleware
-  tourSchema.pre(/^find/,function(next){
+  tourSchema.pre(/^find/,function(){
     this.find({secretTour:{$ne:true}});
     this.start=Date.now();
-    next();
+    // next();
   })
 
-  tourSchema.post(/^find/,function(docs,next){
+  tourSchema.post(/^find/,function(docs){
     console.log(`Query took ${Date.now()-this.start} milliseconds`);
-    next();
+  })
+   tourSchema.pre(/^find/,function(docs){
+   this.populate({
+    path:'guides',
+    select:'-__v -passwordChangedAt'
+   })
   })
 
   // aggregation middleware
-  tourSchema.pre('aggregate',function(next){
-    this.pipeLine().unshift({$match:{secretTour:{$ne:true}}});
+  tourSchema.pre('aggregate',function(){
+    this.pipeline().unshift({$match:{secretTour:{$ne:true}}});
     console.log(this.pipeLine());
-    next();
+    // next();
   })
  const Tour=mongoose.model('Tour',tourSchema);
 
