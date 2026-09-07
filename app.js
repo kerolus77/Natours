@@ -1,30 +1,55 @@
 const express = require('express');
+const path = require('path');
 const morgan=require('morgan');
 const rateLimit=require('express-rate-limit');
 const helmet=require('helmet');
-const mongoSanitize=require('express-mongo-sanitize');
-const xss=require('xss-clean');
 const hpp=require('hpp');
+const cookieParser=require('cookie-parser');
 const tourRouter=require('./routes/toursRoutes');
 const userRouter=require('./routes/userRoutes');
+const viewRouter=require('./routes/viewsRoutes');
+const bookingRouter=require('./routes/bookingRoutes');
 const reviewRouter=require('./routes/reviewsRoutes');
 const AppError=require('./utils/appError');
 const globalErrorHandler=require('./controllers/ErrorController');
+const compression=require('compression');
 
 
 const app = express();
 
 
 console.log(process.env.NODE_ENV);
-////////////////////global middleware///////////////////////
 
+app.set('view engine','pug');
+app.set('views',path.join(__dirname,'views'));
+////////////////////global middleware///////////////////////
+//Serving static files
+ app.use(compression());
+ app.use(express.static(path.join(__dirname,'public')));
 //Set security HTTP headers
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      'script-src': ["'self'", 'https://api.mapbox.com', 'https://js.stripe.com'],
+      'style-src': ["'self'", "'unsafe-inline'", 'https://api.mapbox.com', 'https://fonts.googleapis.com'],
+      'font-src': ["'self'", 'https://fonts.gstatic.com', 'data:'],
+      'img-src': ["'self'", 'data:', 'blob:', 'https://*.mapbox.com'],
+      'connect-src': ["'self'", 'https://*.mapbox.com', 'https://api.stripe.com'],
+      'frame-src': ["'self'", 'https://js.stripe.com', 'https://checkout.stripe.com'],
+      'worker-src': ["'self'", 'blob:'],
+      'child-src': ["'self'", 'blob:']
+    }
+  }
+}));
 
 //Development logging
 if(process.env.NODE_ENV==='development'){
   app.use(morgan('dev'));
 }
+
+//cookie parser
+app.use(cookieParser());
+
 
 //Limit requests from same API
 const limiter=rateLimit({
@@ -41,10 +66,10 @@ app.use(express.json({
 }));
 
 //Data sanitization against NoSQL query injection
-app.use(mongoSanitize()); 
+// app.use(mongoSanitize()); 
 
 //Data sanitization against XSS
-app.use(xss()); 
+// app.use(xss()); 
 
 //Prevent parameter pollution
 app.use(hpp({
@@ -58,14 +83,16 @@ app.use(hpp({
   ]
 }))
 
-//Serving static files
- app.use(express.static(`${__dirname}/public`));
+
 
 
 //Routes
+app.use('/',viewRouter);
 app.use('/api/v1/users',userRouter);
 app.use('/api/v1/tours',tourRouter);
 app.use('/api/v1/reviews',reviewRouter);
+app.use('/api/v1/bookings',bookingRouter);
+
 app.all("/{any}",(req,res,next)=>{
   next(new AppError(`Can't find ${req.originalUrl} on this server!`,404));
 })
