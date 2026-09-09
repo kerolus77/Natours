@@ -1,0 +1,1 @@
+{"version":3,"file":"apiFeature.d.ts","sourceRoot":"","sources":["../../utils/apiFeature.ts"],"names":[],"mappings":"AAAA,cAAM,UAAU;IACX,KAAK,EAAE,GAAG,CAAC;IACX,QAAQ,EAAE,GAAG,CAAC;IAEf,YAAY,KAAK,EAAE,GAAG,EAAC,QAAQ,EAAE,GAAG,EAGnC;IAED,MAAM,SAaL;IAED,IAAI,SAQH;IAGD,aAAa,SASZ;IAGD,UAAU,SAMb;CAEA;eACc,UAAU"}

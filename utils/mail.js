@@ -1,7 +1,29 @@
 const nodeMailer = require('nodemailer');
-const sendEmail= async options=>{
-    //1) Create a transporter
-    const transport = nodeMailer.createTransport(
+const pug=require('pug');
+const htmlToText=require('html-to-text');
+
+module.exports= class Email{
+  constructor(user,url){
+    this.to=user.email;
+    this.firstName=user.name.split(' ')[0];
+    this.url=url;
+    this.from=`NaTours <${process.env.EMAIL_FROM}>`;
+  }
+
+  newTransport(){
+    if(process.env.NODE_ENV==='production'){
+     return nodeMailer.createTransport(
+      {
+        host: process.env.SENDGRID_HOST,
+        port: process.env.SENDGRID_PORT,
+        auth: {
+          user: process.env.SENDGRID_USERNAME,
+          pass: process.env.SENDGRID_PASSWORD
+        }
+      }
+     )
+    }else{
+      return nodeMailer.createTransport(
   {
      host: process.env.EMAIL_HOST,
   port: process.env.EMAIL_PORT,
@@ -11,16 +33,37 @@ const sendEmail= async options=>{
   }
   }
 );
+    }
 
-    //2) Define the email options
-    const mailOptions={
-        from: "NaTours <kerolus@example.com>" ,
-        to:options.email,
-        subject:options.subject,
-        text:options.message
+  }
+
+  async send(template,subject){
+    //1) Render HTML based on a pug template
+    const html= pug.renderFile(`${__dirname}/../views/emails/${template}.pug`,{
+      firstName:this.firstName,
+      url:this.url,
+      subject
+    });
+
+    //2) Define email options
+ const mailOptions={
+        from: this.from ,
+        to:this.to,
+        html,
+        subject,
+        text:htmlToText.fromString(html)
     };
-    //3) Actually send the email
-    await transport.sendMail(mailOptions);
-};
+  
+    await this.newTransport().sendMail(mailOptions);
+  }
 
-module.exports=sendEmail;
+    async sendWelcome() {
+    await this.send('welcome', 'Welcome to the Natours Family!');
+  }
+  async sendPasswordReset() {
+    await this.send(
+      'passwordReset',
+      'Your password reset token (valid for only 10 minutes)'
+    );
+  }
+}

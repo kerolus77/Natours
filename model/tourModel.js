@@ -124,6 +124,9 @@
     localField:'_id'
   })
 
+  tourSchema.index({price:1,ratingsAverage:-1});
+  tourSchema.index({slug:1});
+  tourSchema.index({startLocation:'2dsphere'});
   
 // DOCUMENT MIDDLEWARE: runs before .save() and .create() not on .insertMany()
   tourSchema.pre('save',function(){
@@ -146,14 +149,15 @@
     path:'guides',
     select:'-__v -passwordChangedAt'
    })
+
   })
 
   // aggregation middleware
-  tourSchema.pre('aggregate',function(){
-    this.pipeline().unshift({$match:{secretTour:{$ne:true}}});
-    console.log(this.pipeLine());
-    // next();
-  })
+  // tourSchema.pre('aggregate',function(){
+  //   this.pipeline().unshift({$match:{secretTour:{$ne:true}}});
+  //   console.log(this.pipeLine());
+  //   // next();
+  // })
  const Tour=mongoose.model('Tour',tourSchema);
 
  module.exports=Tour;
