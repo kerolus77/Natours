@@ -37,7 +37,9 @@ block content
         .overview-box__group
           h2.heading-secondary.ma-bt-lg Quick facts
 
-          - const date = tour.startDates[0].toLocaleString('en-us', {month: 'long', year: 'numeric'})
+          - const firstDate = tour.startDates && tour.startDates[0]
+          - const firstStartDate = firstDate && (firstDate.startDate || firstDate)
+          - const date = firstStartDate ? firstStartDate.toLocaleString('en-us', {month: 'long', year: 'numeric'}) : 'No dates available'
           +overviewBox('Next date', date, 'calendar')
           +overviewBox('Difficulty', tour.difficulty, 'trending-up')
           +overviewBox('Participants', `${tour.maxGroupSize} people`, 'user')
@@ -85,6 +87,11 @@ block content
         h2.heading-secondary What are you waiting for?
         p.cta__text= `${tour.duration} days. 1 adventure. Infinite memories. Make it yours today!`
         if currentUser
-          button.btn.btn--green.span-all-rows#book-tour(data-tour-id=`${tour.id}`) Book tour now!
+          label.form__label(for='tour-date') Choose a start date
+          select#tour-date.form__input
+            each date in tour.startDates
+              option(value=date.startDate.toISOString(), disabled=date.soldOut || date.participants >= tour.maxGroupSize)
+                | #{date.startDate.toLocaleDateString()} - #{date.soldOut || date.participants >= tour.maxGroupSize ? 'Sold out' : `${tour.maxGroupSize - date.participants} spots left`}
+          button.btn.btn--green.span-all-rows#book-tour-date(data-tour-id=`${tour.id}`) Book tour now!
         else
           a.btn.btn--green.span-all-rows(href='/login') Log in to book tour

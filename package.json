@@ -2,11 +2,12 @@
   "name": "natours",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "app.ts",
+  "type": "module",
   "scripts": {
-    "start": "nodemon server.js",
-    "start:prod": "set NODE_ENV=production && nodemon server.js",
-    "debug": "ndb server.js",
+    "dev": "tsx watch server.ts",
+    "start": "tsx server.ts",
+    "typecheck": "tsc --noEmit",
     "watch:js": "parcel watch --target bundle",
     "build:js": "parcel build --target bundle"
   },
@@ -43,6 +44,20 @@
     "stripe": "^22.6.1"
   },
   "devDependencies": {
-    "parcel": "^2.16.4"
+    "@types/compression": "^1.8.1",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/express": "^5.0.6",
+    "@types/express-rate-limit": "^6.0.2",
+    "@types/hpp": "^0.2.7",
+    "@types/html-to-text": "^9.0.4",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
+    "@types/multer": "^2.2.0",
+    "@types/node": "^26.5.0",
+    "@types/nodemailer": "^6.4.24",
+    "@types/pug": "^2.0.10",
+    "parcel": "^2.16.4",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2"
   }
 }
