@@ -23,7 +23,12 @@ block content
                         .card__data
                             svg.card__icon
                                 use(xlink:href='img/icons.svg#icon-calendar')
-                            span #{tour.startDates[0].toLocaleString('en-us', { month: 'long', year: 'numeric' })}
+                            - const firstDate = tour.startDates && tour.startDates[0]
+                            - const firstStartDate = firstDate && (firstDate.startDate || firstDate)
+                            if firstStartDate
+                                span #{firstStartDate.toLocaleString('en-us', { month: 'long', year: 'numeric' })}
+                            else
+                                span No dates available
                         .card__data
                             svg.card__icon
                                 use(xlink:href='img/icons.svg#icon-flag')
